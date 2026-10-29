@@ -42,6 +42,7 @@ nco-regime-taa/
 │   ├── monthly_ledger.csv            # Detailed monthly accounting ledger (NAV, weights, turnover, costs)
 │   ├── rebalancing_audit.csv         # Breakdown of rebalance events (regime shift vs weight drift)
 │   └── tc_sensitivity.csv            # Slippage sensitivity grid (0 to 20 bps)
+├── sbn_duration_robustness.csv   # Duration-convexity sensitivity grid (D* in [5.0, 8.0] yr)
 ├── requirements.txt                  # Python dependencies
 ├── LICENSE                           # MIT Open Source License
 └── README.md                         # Documentation
@@ -84,6 +85,34 @@ All data is pre-processed into monthly decimal returns in `data/dataset_monthly_
 - **Statistical Significance:** The pairwise Jobson–Korkie test ($z = 2.684, p = 0.0073^{**}$) confirms the statistical superiority of static NCO over Regime-NCO at the 1% significance level.
 
 ---
+
+
+---
+
+## Sovereign Bond (SBN) Repricing & Duration Robustness (Table VII)
+
+To evaluate the sensitivity of portfolio outcomes to sovereign fixed-income return specifications, we implement an analytical duration-convexity repricing model for the Indonesian 10-year sovereign bond (SBN):
+
+\\Delta P_t / P_{t-1} \\approx - D^* \\Delta y_t + \\frac{1}{2} C_x (\\Delta y_t)^2 + \\frac{y_{t-1}}{12}
+
+where $\\Delta y_t = y_t - y_{t-1}$ is the monthly shift in 10-year benchmark yields, ^*$ is the modified duration,  \\approx 60.0\\text{ yr}^2$ is bond convexity, and {t-1}/12$ represents accrued coupon carry. 
+
+Walk-forward performance across a spectrum of modified duration specifications (^* \\in [5.0, 8.0]$ years) over the 56-month out-of-sample period confirms empirical invariance:
+
+| Modified Duration Specification | Ann. Return (%) | Max Drawdown (%) | Excess Sharpe ( = 5.75\%$) | Calmar Ratio |
+| :--- | :---: | :---: | :---: | :---: |
+| **Panel A: Static NCO (Regime-Agnostic)** | | | | |
+| ^* = 5.0\\text{ yr}$ | 7.16 | 4.19 | +0.2623 | 1.7107 |
+| ^* = 6.0\\text{ yr}$ | 7.12 | 4.47 | +0.2425 | 1.5930 |
+| ^* = 7.0\\text{ yr}$ (Base) | **7.01** | **4.68** | **+0.2205** | **1.4964** |
+| ^* = 8.0\\text{ yr}$ | 6.87 | 4.84 | +0.1943 | 1.4188 |
+| **Panel B: Regime-NCO (Adaptive Switching)** | | | | |
+| ^* = 5.0\\text{ yr}$ | 4.75 | 7.20 | -0.1741 | 0.6596 |
+| ^* = 6.0\\text{ yr}$ | 5.06 | 7.56 | -0.1206 | 0.6701 |
+| ^* = 7.0\\text{ yr}$ (Base) | 3.87 | 7.88 | -0.3139 | 0.4910 |
+| ^* = 8.0\\text{ yr}$ | 4.31 | 8.17 | -0.2307 | 0.5281 |
+
+*Empirical Takeaway:* Static NCO maintains ~7% CAGR, ~4.5% MDD, and positive excess Sharpe ratios across the entire duration spectrum, whereas Regime-NCO consistently underperforms (Sharpe -0.12 to -0.31, turnover >20%/month). This establishes that the estimation noise pathology in regime-conditioned NCO is invariant to fixed-income modeling choices.
 
 ## Quickstart & Reproduction
 
